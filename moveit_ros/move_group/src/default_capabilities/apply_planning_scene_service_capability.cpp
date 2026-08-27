@@ -35,6 +35,7 @@
 /* Author: Michael Goerner */
 
 #include "apply_planning_scene_service_capability.hpp"
+#include "malloc_trim_hook.hpp"
 #include <moveit/moveit_cpp/moveit_cpp.hpp>
 #include <moveit/move_group/capability_names.hpp>
 #include <moveit/utils/logger.hpp>
@@ -73,6 +74,7 @@ bool ApplyPlanningSceneService::applyScene(const std::shared_ptr<rmw_request_id_
   }
   context_->planning_scene_monitor_->updateFrameTransforms();
   res->success = context_->planning_scene_monitor_->newPlanningSceneMessage(req->scene);
+  trimHeapAfterRequest();
   return true;
 }
 }  // namespace move_group
