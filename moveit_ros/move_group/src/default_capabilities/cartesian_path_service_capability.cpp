@@ -35,6 +35,7 @@
 /* Author: Ioan Sucan */
 
 #include "cartesian_path_service_capability.hpp"
+#include "malloc_trim_hook.hpp"
 #include <moveit/moveit_cpp/moveit_cpp.hpp>
 #include <moveit/robot_state/conversions.hpp>
 #include <moveit/utils/message_checks.hpp>
@@ -222,6 +223,7 @@ bool MoveGroupCartesianPathService::computeService(
     res->error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_GROUP_NAME;
   }
 
+  trimHeapAfterRequest();
   return true;
 }
 

@@ -35,7 +35,7 @@
 /* Author: Ioan Sucan */
 
 #include "plan_service_capability.hpp"
-
+#include "malloc_trim_hook.hpp"
 #include <moveit/moveit_cpp/moveit_cpp.hpp>
 #include <moveit/planning_pipeline/planning_pipeline.hpp>
 #include <moveit/move_group/capability_names.hpp>
@@ -102,6 +102,7 @@ bool MoveGroupPlanService::computePlanService(const std::shared_ptr<rmw_request_
     res->motion_plan_response.error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
   }
 
+  trimHeapAfterRequest();
   return true;
 }
 }  // namespace move_group
