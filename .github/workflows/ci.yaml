@@ -29,7 +29,7 @@ jobs:
       # https://stackoverflow.com/a/41673702
       CXXFLAGS: >-
         -Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls -Wno-unknown-warning-option
-      CLANG_TIDY_ARGS: --fix --fix-errors --format-style=file
+      CLANG_TIDY_ARGS: -fix -format -style=file
       DOCKER_IMAGE: moveit/moveit2:${{ matrix.env.IMAGE }}
       UPSTREAM_WORKSPACE: >
         moveit2.repos
@@ -161,7 +161,7 @@ jobs:
           docker: $DOCKER_IMAGE
           workdir: ${{ env.BASEDIR }}/target_ws
           lcov_capture_args: --ignore-errors=gcov,gcov,mismatch,mismatch,negative,negative
-          ignore: '"*/target_ws/build/*" "*/target_ws/install/*" "*/test/*"'
+          ignore: '"*/target_ws/build/*" "*/test/*"'
       - name: Upload codecov report
         uses: codecov/codecov-action@v5
         if: always() && matrix.env.CCOV && steps.ici.outputs.target_test_results == '0'

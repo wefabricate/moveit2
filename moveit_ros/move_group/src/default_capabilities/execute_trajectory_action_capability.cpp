@@ -35,7 +35,7 @@
 /* Author: Kentaro Wada */
 
 #include "execute_trajectory_action_capability.hpp"
-
+#include "malloc_trim_hook.hpp"
 #include <moveit/moveit_cpp/moveit_cpp.hpp>
 #include <moveit/plan_execution/plan_execution.hpp>
 #include <moveit/trajectory_processing/trajectory_tools.hpp>
@@ -112,6 +112,8 @@ void MoveGroupExecuteTrajectoryAction::executePathCallback(const std::shared_ptr
   }
 
   setExecuteTrajectoryState(IDLE, goal);
+
+  trimHeapAfterRequest();
 }
 
 void MoveGroupExecuteTrajectoryAction::executePath(const std::shared_ptr<ExecTrajectoryGoal>& goal,

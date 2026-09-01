@@ -35,7 +35,7 @@
 /* Author: Ioan Sucan */
 
 #include "move_action_capability.hpp"
-
+#include "malloc_trim_hook.hpp"
 #include <moveit/moveit_cpp/moveit_cpp.hpp>
 #include <moveit/planning_pipeline/planning_pipeline.hpp>
 #include <moveit/plan_execution/plan_execution.hpp>
@@ -126,6 +126,8 @@ void MoveGroupMoveAction::executeMoveCallback(const std::shared_ptr<MGActionGoal
   setMoveState(IDLE, goal_);
   preempt_requested_ = false;
   goal_.reset();
+
+  trimHeapAfterRequest();
 }
 
 void MoveGroupMoveAction::executeMoveCallbackPlanAndExecute(const std::shared_ptr<MGActionGoal>& goal,
