@@ -18,7 +18,8 @@ jobs:
       matrix:
         env:
           - IMAGE: jazzy-ci
-            CCOV: true
+            #CCOV: true
+            #wf: no CCOV - moveit_core is colcon ignored which causes CI fail if CCOV is enabled
             ROS_DISTRO: jazzy
           - IMAGE: jazzy-ci
             ROS_DISTRO: jazzy
@@ -118,7 +119,8 @@ jobs:
           restore-keys: ${{ env.CACHE_PREFIX }}
         env:
           GHA_CACHE_SAVE: always
-          CACHE_PREFIX: target_ws${{ matrix.env.CCOV && '-ccov' || '' }}-${{ matrix.env.IMAGE }}-${{ hashFiles('**/CMakeLists.txt', '**/package.xml', '.github/workflows/ci.yaml') }}
+          #Change taken from: https://github.com/moveit/moveit2/pull/3776/changes
+          CACHE_PREFIX: target_ws-${{ matrix.env.IMAGE }}-${{ matrix.env.CCOV && 'ccov' || matrix.env.CLANG_TIDY && 'tidy' || 'default' }}-${{ hashFiles('**/CMakeLists.txt', '**/package.xml', '.github/workflows/ci.yaml') }}
       - name: Cache ccache
         uses: rhaschke/cache@main
         with:
@@ -129,7 +131,8 @@ jobs:
             ${{ env.CACHE_PREFIX }}
         env:
           GHA_CACHE_SAVE: always
-          CACHE_PREFIX: ccache-${{ matrix.env.IMAGE }}${{ matrix.env.CCOV && '-ccov' || '' }}
+          #Change taken from: https://github.com/moveit/moveit2/pull/3776/changes
+          CACHE_PREFIX: ccache-${{ matrix.env.IMAGE }}-${{ matrix.env.CCOV && 'ccov' || matrix.env.CLANG_TIDY && 'tidy' || 'default' }}
       - name: Configure ccache
         run: |
           mkdir -p ${{ env.CCACHE_DIR }}
