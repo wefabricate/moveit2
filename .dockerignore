@@ -4,6 +4,7 @@
 !moveit2*.repos
 !**/package.xml
 !**/COLCON_IGNORE
+!**/pins.repos
 
 # https://github.com/moby/moby/issues/42788
 !moveit_plugins/moveit_plugins/package.xml

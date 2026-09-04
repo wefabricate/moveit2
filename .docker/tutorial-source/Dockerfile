@@ -30,6 +30,8 @@ RUN --mount=type=cache,target=/root/.ccache/,sharing=locked \
         PATH=/usr/lib/ccache:$PATH && \
         # Checkout the tutorial repo
         git clone https://github.com/moveit/moveit2_tutorials src/moveit2_tutorials && \
+        #wf: pre-seed pinned deps - the --skip-existing import below leaves them in place
+        vcs import src < src/moveit2/.docker/tutorial-source/pins.repos && \
         # Fetch required upstream sources for building
         vcs import --skip-existing src < src/moveit2_tutorials/moveit2_tutorials.repos && \
         # Source ROS install
