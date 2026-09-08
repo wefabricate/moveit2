@@ -131,9 +131,13 @@ jobs:
           restore-keys: ${{ env.CACHE_PREFIX }}
         env:
           GHA_CACHE_SAVE: always
+<<<<<<< HEAD
           # The variant token (ccov/tidy/default) keeps caches built with different compilers/flags
           # in separate key namespaces. Without it, the clang (clang-tidy) and gcc (deprecation/plain)
           # rolling jobs share one key and restore each other's build tree, forcing a full rebuild.
+=======
+          #Change taken from: https://github.com/moveit/moveit2/pull/3776/changes
+>>>>>>> b9c5925a4 (Added COLCON_IGNORE to moveit_core (#3))
           CACHE_PREFIX: target_ws-${{ matrix.env.IMAGE }}-${{ matrix.env.CCOV && 'ccov' || matrix.env.CLANG_TIDY && 'tidy' || 'default' }}-${{ hashFiles('**/CMakeLists.txt', '**/package.xml', '.github/workflows/ci.yaml') }}
       - name: Cache ccache
         uses: rhaschke/cache@main
@@ -145,8 +149,12 @@ jobs:
             ${{ env.CACHE_PREFIX }}
         env:
           GHA_CACHE_SAVE: always
+<<<<<<< HEAD
           # Use a distinct suffix per build variant ('ccov'/'tidy'/'default'),
           # so each job restores its own cache.
+=======
+          #Change taken from: https://github.com/moveit/moveit2/pull/3776/changes
+>>>>>>> b9c5925a4 (Added COLCON_IGNORE to moveit_core (#3))
           CACHE_PREFIX: ccache-${{ matrix.env.IMAGE }}-${{ matrix.env.CCOV && 'ccov' || matrix.env.CLANG_TIDY && 'tidy' || 'default' }}
       - name: Configure ccache
         run: |
