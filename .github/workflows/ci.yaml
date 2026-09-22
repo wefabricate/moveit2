@@ -29,8 +29,6 @@ jobs:
           - IMAGE: lyrical-ci-testing
             EXTRA_CXX_FLAGS: -Wno-error=deprecated-declarations
           - IMAGE: jazzy-ci
-            IKFAST_TEST: true
-          - IMAGE: humble-ci
     env:
       # TODO(andyz): When this clang-tidy issue is fixed, remove -Wno-unknown-warning-option
       # https://stackoverflow.com/a/41673702

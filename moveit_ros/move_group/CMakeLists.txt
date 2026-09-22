@@ -37,9 +37,9 @@ set_target_properties(moveit_move_group_capabilities_base
 target_link_libraries(
   moveit_move_group_capabilities_base
   fmt::fmt
-  moveit_core::moveit_core
+  ${moveit_core_TARGETS}
   moveit_ros_occupancy_map_monitor::moveit_ros_occupancy_map_monitor
-  moveit_ros_planning::moveit_ros_planning
+  ${moveit_ros_planning_TARGETS}
   pluginlib::pluginlib
   rclcpp::rclcpp
   rclcpp_action::rclcpp_action
@@ -47,6 +47,24 @@ target_link_libraries(
   tf2::tf2
   tf2_geometry_msgs::tf2_geometry_msgs
   tf2_ros::tf2_ros)
+
+find_package(moveit_msgs REQUIRED)
+
+if(moveit_msgs_VERSION VERSION_GREATER_EQUAL 2.7.0)
+  set(MULTI_STATE_CAPABILITY_SOURCE
+      src/default_capabilities/multi_state_validation_service_capability.cpp)
+  set(MULTI_STATE_CAPABILITY_CLASS
+      "<class name=\"move_group/MoveGroupMultiStateValidationService\" type=\"move_group::MoveGroupMultiStateValidationService\" base_class_type=\"move_group::MoveGroupCapability\">
+    <description>
+      Provide a ROS service that allows for testing multiple joint states validity
+    </description>
+  </class>")
+else()
+  set(MULTI_STATE_CAPABILITY_SOURCE "")
+  set(MULTI_STATE_CAPABILITY_CLASS
+      "<!-- MoveGroupMultiStateValidationService omitted: moveit_msgs ${moveit_msgs_VERSION} predates GetMultiStateValidity -->"
+  )
+endif()
 
 add_library(
   moveit_move_group_default_capabilities SHARED
@@ -63,7 +81,7 @@ add_library(
   src/default_capabilities/query_planners_service_capability.cpp
   src/default_capabilities/save_geometry_to_file_service_capability.cpp
   src/default_capabilities/state_validation_service_capability.cpp
-  src/default_capabilities/multi_state_validation_service_capability.cpp
+  ${MULTI_STATE_CAPABILITY_SOURCE}
   src/default_capabilities/tf_publisher_capability.cpp)
 target_include_directories(
   moveit_move_group_default_capabilities
@@ -75,9 +93,9 @@ target_link_libraries(
   moveit_move_group_default_capabilities
   moveit_move_group_capabilities_base
   fmt::fmt
-  moveit_core::moveit_core
+  ${moveit_core_TARGETS}
   moveit_ros_occupancy_map_monitor::moveit_ros_occupancy_map_monitor
-  moveit_ros_planning::moveit_ros_planning
+  ${moveit_ros_planning_TARGETS}
   pluginlib::pluginlib
   rclcpp::rclcpp
   rclcpp_action::rclcpp_action
@@ -92,9 +110,9 @@ target_link_libraries(
   move_group
   moveit_move_group_capabilities_base
   fmt::fmt
-  moveit_core::moveit_core
+  ${moveit_core_TARGETS}
   moveit_ros_occupancy_map_monitor::moveit_ros_occupancy_map_monitor
-  moveit_ros_planning::moveit_ros_planning
+  ${moveit_ros_planning_TARGETS}
   pluginlib::pluginlib
   rclcpp::rclcpp
   rclcpp_action::rclcpp_action
@@ -109,9 +127,9 @@ target_link_libraries(
   list_move_group_capabilities
   moveit_move_group_capabilities_base
   fmt::fmt
-  moveit_core::moveit_core
+  ${moveit_core_TARGETS}
   moveit_ros_occupancy_map_monitor::moveit_ros_occupancy_map_monitor
-  moveit_ros_planning::moveit_ros_planning
+  ${moveit_ros_planning_TARGETS}
   pluginlib::pluginlib
   rclcpp::rclcpp
   rclcpp_action::rclcpp_action
@@ -150,8 +168,15 @@ install(DIRECTORY include/ DESTINATION include/moveit_ros_move_group)
 install(PROGRAMS scripts/load_map scripts/save_map
         DESTINATION lib/moveit_ros_move_group)
 
-pluginlib_export_plugin_description_file(
-  moveit_ros_move_group default_capabilities_plugin_description.xml)
+configure_file(
+  default_capabilities_plugin_description.xml
+  ${CMAKE_CURRENT_BINARY_DIR}/default_capabilities_plugin_description.xml @ONLY)
+install(
+  FILES ${CMAKE_CURRENT_BINARY_DIR}/default_capabilities_plugin_description.xml
+  DESTINATION share/${PROJECT_NAME})
+ament_index_register_resource(
+  moveit_ros_move_group__pluginlib__plugin CONTENT
+  "share/${PROJECT_NAME}/default_capabilities_plugin_description.xml\n")
 
 if(BUILD_TESTING)
   # TODO(henningkayser): enable rostests find_package(rostest REQUIRED) #
