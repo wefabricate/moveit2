@@ -230,7 +230,7 @@ appendConstraintsAsFetchQueryWithTolerance(Query& query, std::vector<moveit_msgs
   {
     for (const auto& position_constraint : constraint.position_constraints)
     {
-      if (!position_constraint.constraint_region.primitives.empty())
+      if (!position_constraint.constraint_region.meshes.empty())
       {
         emit_position_constraint_warning = true;
         break;
@@ -243,7 +243,8 @@ appendConstraintsAsFetchQueryWithTolerance(Query& query, std::vector<moveit_msgs
   }
   if (emit_position_constraint_warning)
   {
-    RCLCPP_WARN_STREAM(getLogger(), "Ignoring " << prefix << ".position_constraints.constraint_region: Not supported.");
+    RCLCPP_WARN_STREAM(getLogger(),
+                       "Ignoring " << prefix << ".position_constraints.constraint_region.meshes: Not supported.");
   }
 
   bool emit_visibility_constraint_warning = false;
@@ -298,6 +299,36 @@ appendConstraintsAsFetchQueryWithTolerance(Query& query, std::vector<moveit_msgs
         canonical_position.x = position_constraint.target_point_offset.x;
         canonical_position.y = position_constraint.target_point_offset.y;
         canonical_position.z = position_constraint.target_point_offset.z;
+
+        size_t k = 0;
+        for (const auto& primitive_poses : position_constraint.constraint_region.primitive_poses)
+        {
+          std::string query_pose_name = query_name + ".constraint_region.primitive_poses_" + std::to_string(k++);
+          geometry_msgs::msg::Pose canonical_pose;
+          canonical_pose.position.x = primitive_poses.position.x;
+          canonical_pose.position.y = primitive_poses.position.y;
+          canonical_pose.position.z = primitive_poses.position.z;
+
+          if (position_constraint.header.frame_id != reference_frame_id)
+          {
+            if (MoveItErrorCode status =
+                    restateInNewFrame(move_group.getTF(), position_constraint.header.frame_id, reference_frame_id,
+                                      &canonical_pose.position, nullptr, tf2::TimePointZero);
+                status != MoveItErrorCode::SUCCESS)
+            {
+              std::stringstream ss;
+              ss << "Skipping " << prefix << ":" << query_name << " query append: " << status.message;
+              return MoveItErrorCode(status.val, status.message);
+            }
+          }
+
+          queryAppendCenterWithTolerance(query, query_pose_name + ".position.x", canonical_pose.position.x,
+                                         match_tolerance);
+          queryAppendCenterWithTolerance(query, query_pose_name + ".position.y", canonical_pose.position.y,
+                                         match_tolerance);
+          queryAppendCenterWithTolerance(query, query_pose_name + ".position.z", canonical_pose.position.z,
+                                         match_tolerance);
+        }
 
         // Canonicalize to robot base frame if necessary.
         if (position_constraint.header.frame_id != reference_frame_id)
@@ -382,7 +413,7 @@ moveit::core::MoveItErrorCode appendConstraintsAsInsertMetadata(Metadata& metada
   {
     for (const auto& position_constraint : constraint.position_constraints)
     {
-      if (!position_constraint.constraint_region.primitives.empty())
+      if (!position_constraint.constraint_region.meshes.empty())
       {
         emit_position_constraint_warning = true;
         break;
@@ -395,7 +426,8 @@ moveit::core::MoveItErrorCode appendConstraintsAsInsertMetadata(Metadata& metada
   }
   if (emit_position_constraint_warning)
   {
-    RCLCPP_WARN_STREAM(getLogger(), "Ignoring " << prefix << ".position_constraints.constraint_region: Not supported.");
+    RCLCPP_WARN_STREAM(getLogger(),
+                       "Ignoring " << prefix << ".position_constraints.constraint_region.meshes: Not supported.");
   }
 
   bool emit_visibility_constraint_warning = false;
@@ -450,6 +482,32 @@ moveit::core::MoveItErrorCode appendConstraintsAsInsertMetadata(Metadata& metada
         canonical_position.x = position_constraint.target_point_offset.x;
         canonical_position.y = position_constraint.target_point_offset.y;
         canonical_position.z = position_constraint.target_point_offset.z;
+
+        size_t k = 0;
+        for (const auto& primitive_poses : position_constraint.constraint_region.primitive_poses)
+        {
+          std::string meta_pose_name = meta_name + ".constraint_region.primitive_poses_" + std::to_string(k++);
+          geometry_msgs::msg::Pose canonical_pose;
+          canonical_pose.position.x = primitive_poses.position.x;
+          canonical_pose.position.y = primitive_poses.position.y;
+          canonical_pose.position.z = primitive_poses.position.z;
+
+          if (position_constraint.header.frame_id != workspace_frame_id)
+          {
+            if (MoveItErrorCode status =
+                    restateInNewFrame(move_group.getTF(), position_constraint.header.frame_id, workspace_frame_id,
+                                      &canonical_pose.position, nullptr, tf2::TimePointZero);
+                status != MoveItErrorCode::SUCCESS)
+            {
+              std::stringstream ss;
+              ss << "Skipping " << prefix << ":" << meta_name << " metadata append: " << status.message;
+              return MoveItErrorCode(status.val, status.message);
+            }
+          }
+          metadata.append(meta_pose_name + ".position.x", canonical_pose.position.x);
+          metadata.append(meta_pose_name + ".position.y", canonical_pose.position.y);
+          metadata.append(meta_pose_name + ".position.z", canonical_pose.position.z);
+        }
 
         // Canonicalize to robot base frame if necessary.
         if (position_constraint.header.frame_id != workspace_frame_id)
