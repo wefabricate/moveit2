@@ -93,7 +93,9 @@ jobs:
       - uses: actions/checkout@v7
       # COLCON_IGNORE files for the production build; CI builds the full stack from source
       - name: Remove COLCON_IGNORE files
-        run: find . -name COLCON_IGNORE -not -path './.git/*' -print -delete
+        run: >
+          git rm --ignore-unmatch -- ':(glob)**/COLCON_IGNORE'
+          ':(exclude)moveit_setup_assistant/moveit_setup_simulation/COLCON_IGNORE'
 # NOTE: Testspace is temporarily disabled and needs to be installed for the MoveIt org
 # See: https://github.com/moveit/moveit2/issues/2852
 #       - uses: testspace-com/setup-testspace@v1
